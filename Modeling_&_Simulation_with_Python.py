@@ -34,8 +34,8 @@ st.markdown("---")
 #st.caption("By Team ORION")
 with st.expander("By Team ORION"):
             st.write("""
-             - **Venn Delos P. Santos
-             - **John Christian M. Gava
-             - **Marc Christian D. Tumaneng
+                - **Venn Delos P. Santos
+                - **John Christian M. Gava
+                - **Marc Christian D. Tumaneng
             """)
 
