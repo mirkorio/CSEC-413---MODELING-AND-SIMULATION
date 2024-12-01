@@ -20,7 +20,7 @@ st.write(
     """
 )
 
-with st.expander("📝"):
+with st.expander("Project Overview"):
         # Project Overview Section
         st.subheader("Project Overview")
         st.write(
