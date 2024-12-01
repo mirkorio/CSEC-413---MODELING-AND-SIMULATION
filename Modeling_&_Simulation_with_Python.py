@@ -20,14 +20,16 @@ st.write(
     """
 )
 
-# Project Overview Section
-st.subheader("Project Overview")
-st.write(
-    """
-    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque non risus in orci tristique dapibus. 
-    Proin nec lacus et urna scelerisque vulputate. Donec in venenatis risus. Nulla facilisi.
-    """
-)
+with st.expander("📝"):
+        # Project Overview Section
+        st.subheader("Project Overview")
+        st.write(
+            """
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque non risus in orci tristique dapibus. 
+            Proin nec lacus et urna scelerisque vulputate. Donec in venenatis risus. Nulla facilisi.
+            """
+        )
+
 
 # Footer or Additional Information
 st.markdown("---")
