@@ -48,15 +48,23 @@ if class_names:
     class_list = [c.strip() for c in class_names.split(",")]
 
     for class_name in class_list:
-        st.subheader(f"Settings for {class_name}")
-        means = []
-        std_devs = []
-        for feature in feature_list:
-            mean = st.number_input(f"Mean for {feature} ({class_name}):", key=f"{class_name}_{feature}_mean")
-            std_dev = st.number_input(f"Std. Dev for {feature} ({class_name}):", key=f"{class_name}_{feature}_std_dev")
-            means.append(mean)
-            std_devs.append(std_dev)
-        class_settings[class_name] = {"mean": means, "std_dev": std_devs}
+        with st.expander(f"Settings for {class_name}", expanded=False):
+            means = []
+            std_devs = []
+            for feature in feature_list:
+                mean = st.number_input(
+                    f"Mean for {feature} ({class_name}):",
+                    value=np.random.uniform(0, 10),
+                    key=f"{class_name}_{feature}_mean",
+                )
+                std_dev = st.number_input(
+                    f"Std. Dev for {feature} ({class_name}):",
+                    value=np.random.uniform(1, 5),
+                    key=f"{class_name}_{feature}_std_dev",
+                )
+                means.append(mean)
+                std_devs.append(std_dev)
+            class_settings[class_name] = {"mean": means, "std_dev": std_devs}
 
 # Number of samples per class
 st.header("Step 3: Generate Data")
