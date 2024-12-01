@@ -31,8 +31,8 @@ st.write(
 
 # Footer or Additional Information
 st.markdown("---")
-st.caption("By Team ORION")
-with st.expander.caption("By Team ORION"):
+#st.caption("By Team ORION")
+with st.expander("By Team ORION"):
             st.subheader("Interpretation of Histograms")
             st.write("""
                 - **Text Similarity Histogram**: This histogram shows the distribution of text similarity scores across the dataset. A concentration of bars at higher percentages indicates a greater number of code pairs with similar text.
