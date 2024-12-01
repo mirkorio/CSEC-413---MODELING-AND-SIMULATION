@@ -12,7 +12,7 @@ st.header("Modeling and Simulation with Python")
 st.markdown("---")
 
 # Introduction Section
-st.header("Introduction")
+st.subheader("Introduction")
 st.write(
     """
     Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
@@ -21,7 +21,7 @@ st.write(
 )
 
 # Project Overview Section
-st.header("Project Overview")
+st.subheader("Project Overview")
 st.write(
     """
     Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque non risus in orci tristique dapibus. 
