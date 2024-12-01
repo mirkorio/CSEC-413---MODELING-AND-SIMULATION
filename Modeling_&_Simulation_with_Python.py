@@ -3,12 +3,13 @@ import streamlit as st
 # Page Configuration
 st.set_page_config(
     page_title="Modeling and Simulation with Python",
-    page_icon="📘",
+    #page_icon="📘",
     layout="centered"
 )
 
 # Title
 st.title("Modeling and Simulation with Python")
+st.markdown("---")
 
 # Introduction Section
 st.header("Introduction")
@@ -30,6 +31,6 @@ st.write(
 
 # Footer or Additional Information
 st.markdown("---")
-st.caption("Explore and learn the basics of Python for modeling and simulation.")
+st.caption("By Team ORION")
 
 
