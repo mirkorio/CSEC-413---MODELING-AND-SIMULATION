@@ -55,15 +55,15 @@ if 'samples_per_class' not in st.session_state:
     st.session_state.samples_per_class = None
 
 # Input for feature names
-st.subheader("Step 1: Define Features")
+st.subheader("Define Features")
 features = st.text_input("Enter feature names separated by commas (e.g., feature1, feature2, feature3):", 
                          value=", ".join(st.session_state.feature_list) if st.session_state.feature_list else "")
 if features:
     st.session_state.feature_list = [f.strip() for f in features.split(",")]
 
 # Input for class settings
-st.subheader("Step 2: Define Classes and Settings")
-class_names = st.text_input("Enter class names separated by commas (e.g., ClassA, ClassB):", 
+st.subheader("Define Classes")
+class_names = st.text_input("Enter class names separated by commas (e.g., ClassA, ClassB, ClassC):", 
                             value=", ".join(st.session_state.class_settings.keys()) if st.session_state.class_settings else "")
 if class_names:
     class_list = [c.strip() for c in class_names.split(",")]
@@ -103,7 +103,7 @@ if class_names:
             st.session_state.class_settings[class_name] = {"mean": means, "std_dev": std_devs}
 
 # Total number of samples
-st.subheader("Step 3: Generate Data")
+st.subheader("Generate Data")
 total_samples = st.number_input("Total number of samples for the dataset:", min_value=1, value=1000, step=1,
                                 key="total_samples", 
                                 help="Total number of samples to generate across all classes.")
