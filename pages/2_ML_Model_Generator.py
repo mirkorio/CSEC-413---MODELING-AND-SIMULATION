@@ -22,22 +22,38 @@ if uploaded_file is not None:
         # Load the data
         data = pd.read_csv(uploaded_file)
         
-        # Display dataset info
-        st.subheader("Dataset Information")
-        info_dict = {
-            column: f"{data[column].dtype}({data[column].count()})"
-            for column in data.columns
-        }
-        info_dict["Total"] = f"np.int64({data.shape[0]})"
-        st.json(info_dict)
+        # Set up columns for side-by-side display
+        col1, col2 = st.columns(2)
 
-        # Display all data
-        st.subheader("Dataset Preview")
-        st.dataframe(data)
+        # Dataset Information in an expander
+        with col1:
+            with st.expander("Dataset Information"):
+                st.write(f"**Number of Rows:** {data.shape[0]}")
+                st.write(f"**Number of Columns:** {data.shape[1]}")
+                for col in data.columns:
+                    st.write(f"**{col}**: {data[col].dtype} ({data[col].count()} non-null values)")
+                
+                # Include classes for each column if applicable
+                st.write("### Classes (Unique Values)")
+                for col in data.columns:
+                    unique_values = data[col].nunique()
+                    if unique_values <= 10:  # Show classes only for columns with <= 10 unique values
+                        st.write(f"**{col}**: {data[col].unique()} ({unique_values} classes)")
+
+        # Dataset Preview in an expander
+        with col2:
+            with st.expander("Dataset Preview"):
+                st.dataframe(data)
 
     except Exception as e:
-        st.error(f"An error occurred while reading the file: {e}")
+        st.error("An error occurred while reading the file. Ensure it's a valid CSV file.")
+        st.write(f"Details: {e}")
 
 # Footer or placeholder for next steps
 st.write("---")
-st.info("More functionalities for ML model generation will be added.")
+st.info("""
+🚀 Coming soon:
+- Feature Selection and Engineering
+- Model Training and Evaluation
+- Automated Hyperparameter Tuning
+""")
