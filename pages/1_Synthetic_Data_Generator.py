@@ -41,21 +41,30 @@ st.set_page_config(page_title="Synthetic Data Generator", page_icon="📊")
 st.header("Synthetic Data Generator")
 st.markdown("---")
 
-# Input for feature names
-st.subheader("Step 1: Define Features")
-features = st.text_input("Enter feature names separated by commas (e.g., feature1, feature2, feature3):")
-if features:
-    feature_list = [f.strip() for f in features.split(",")]
-else:
-    feature_list = []
-
-# Initialize session state for class settings if not already set
+# Initialize session state if not already set
 if 'class_settings' not in st.session_state:
     st.session_state.class_settings = {}
 
+if 'feature_list' not in st.session_state:
+    st.session_state.feature_list = []
+
+if 'generated_data' not in st.session_state:
+    st.session_state.generated_data = None
+
+if 'samples_per_class' not in st.session_state:
+    st.session_state.samples_per_class = None
+
+# Input for feature names
+st.subheader("Step 1: Define Features")
+features = st.text_input("Enter feature names separated by commas (e.g., feature1, feature2, feature3):", 
+                         value=", ".join(st.session_state.feature_list) if st.session_state.feature_list else "")
+if features:
+    st.session_state.feature_list = [f.strip() for f in features.split(",")]
+
 # Input for class settings
 st.subheader("Step 2: Define Classes and Settings")
-class_names = st.text_input("Enter class names separated by commas (e.g., ClassA, ClassB):")
+class_names = st.text_input("Enter class names separated by commas (e.g., ClassA, ClassB):", 
+                            value=", ".join(st.session_state.class_settings.keys()) if st.session_state.class_settings else "")
 if class_names:
     class_list = [c.strip() for c in class_names.split(",")]
 
@@ -69,7 +78,7 @@ if class_names:
             means = st.session_state.class_settings[class_name]["mean"]
             std_devs = st.session_state.class_settings[class_name]["std_dev"]
 
-            for i, feature in enumerate(feature_list):
+            for i, feature in enumerate(st.session_state.feature_list):
                 cols = st.columns(2)  # Two columns for side-by-side inputs
                 with cols[0]:
                     mean = st.number_input(
@@ -95,14 +104,19 @@ if class_names:
 
 # Total number of samples
 st.subheader("Step 3: Generate Data")
-total_samples = st.number_input("Total number of samples for the dataset:", min_value=1, value=1000, step=1)
+total_samples = st.number_input("Total number of samples for the dataset:", min_value=1, value=1000, step=1,
+                                key="total_samples", 
+                                help="Total number of samples to generate across all classes.")
 
 # Generate data button
 if st.button("Generate Data"):
-    if not feature_list or not class_list or not st.session_state.class_settings:
+    if not st.session_state.feature_list or not class_list or not st.session_state.class_settings:
         st.error("Please define features, classes, and their settings.")
     else:
-        synthetic_data, samples_per_class = generate_synthetic_data(feature_list, st.session_state.class_settings, total_samples)
+        synthetic_data, samples_per_class = generate_synthetic_data(st.session_state.feature_list, st.session_state.class_settings, total_samples)
+        st.session_state.generated_data = synthetic_data
+        st.session_state.samples_per_class = samples_per_class
+
         st.success("Synthetic data generated successfully!")
 
         # Display samples per class
