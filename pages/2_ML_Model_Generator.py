@@ -32,7 +32,7 @@ if uploaded_file is not None:
                 st.write(f"**Number of Columns:** {data.shape[1]}")
                 #Feature
                 st.write(f"**Features:** {list(data.columns)}")
-                #
+                #Classes
                 for col in data.columns:
                     unique_values = data[col].unique()
                     unique_count = data[col].nunique()
