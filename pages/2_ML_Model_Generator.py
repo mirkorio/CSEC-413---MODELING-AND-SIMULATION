@@ -33,12 +33,13 @@ if uploaded_file is not None:
                 for col in data.columns:
                     st.write(f"**{col}**: {data[col].dtype} ({data[col].count()} non-null values)")
                 
-                # Include classes for each column if applicable
+                # Include classes for each column in the specified format
                 st.write("### Classes (Unique Values)")
                 for col in data.columns:
-                    unique_values = data[col].nunique()
-                    if unique_values <= 10:  # Show classes only for columns with <= 10 unique values
-                        st.write(f"**{col}**: {data[col].unique()} ({unique_values} classes)")
+                    unique_values = data[col].unique()
+                    unique_count = data[col].nunique()
+                    if unique_count <= 10:  # Show classes only for columns with <= 10 unique values
+                        st.write(f"**{col}:** {list(unique_values)} ({unique_count} classes)")
 
         # Dataset Preview in an expander
         with col2:
