@@ -41,10 +41,19 @@ st.set_page_config(page_title="Synthetic Data Generator", page_icon="📊")
 st.header("Synthetic Data Generator")
 st.markdown("---")
 
+# Initialize session state
+if "features" not in st.session_state:
+    st.session_state.features = ""
+if "classes" not in st.session_state:
+    st.session_state.classes = ""
 
 # Input for feature names
 st.subheader("Step 1: Define Features")
-features = st.text_input("Enter feature names separated by commas (e.g., feature1, feature2, feature3):")
+features = st.text_input("Enter feature names separated by commas (e.g., feature1, feature2, feature3):", value=st.session_state.features)
+if features != st.session_state.features:
+    st.session_state.features = features
+    st.experimental_rerun()
+
 if features:
     feature_list = [f.strip() for f in features.split(",")]
 else:
@@ -53,7 +62,11 @@ else:
 # Input for class settings
 st.subheader("Step 2: Define Classes and Settings")
 class_settings = {}
-class_names = st.text_input("Enter class names separated by commas (e.g., ClassA, ClassB):")
+class_names = st.text_input("Enter class names separated by commas (e.g., ClassA, ClassB):", value=st.session_state.classes)
+if class_names != st.session_state.classes:
+    st.session_state.classes = class_names
+    st.experimental_rerun()
+
 if class_names:
     class_list = [c.strip() for c in class_names.split(",")]
 
@@ -62,16 +75,19 @@ if class_names:
             means = []
             std_devs = []
             for feature in feature_list:
-                mean = st.number_input(
-                    f"Mean for {feature} ({class_name}):",
-                    value=np.random.uniform(0, 10),
-                    key=f"{class_name}_{feature}_mean",
-                )
-                std_dev = st.number_input(
-                    f"Std. Dev for {feature} ({class_name}):",
-                    value=np.random.uniform(1, 5),
-                    key=f"{class_name}_{feature}_std_dev",
-                )
+                col1, col2 = st.columns(2)
+                with col1:
+                    mean = st.number_input(
+                        f"Mean for {feature} ({class_name}):",
+                        value=np.random.uniform(0, 10),
+                        key=f"{class_name}_{feature}_mean",
+                    )
+                with col2:
+                    std_dev = st.number_input(
+                        f"Std. Dev for {feature} ({class_name}):",
+                        value=np.random.uniform(1, 5),
+                        key=f"{class_name}_{feature}_std_dev",
+                    )
                 means.append(mean)
                 std_devs.append(std_dev)
             class_settings[class_name] = {"mean": means, "std_dev": std_devs}
