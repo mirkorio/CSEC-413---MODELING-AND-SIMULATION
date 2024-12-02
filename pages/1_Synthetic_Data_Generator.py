@@ -35,57 +35,84 @@ def generate_synthetic_data(features, class_settings, total_samples):
     return df, samples_per_class
 
 
+# Initialize session state variables
+if "features" not in st.session_state:
+    st.session_state.features = ["average_viewership", "player_count", "prize_pool", "game_duration"]
+
+if "class_settings" not in st.session_state:
+    st.session_state.class_settings = {
+        "League_of_Legends": {"mean": [50000, 10, 1.5, 35], "std_dev": [10000, 2, 0.5, 5]},
+        "Dota_2": {"mean": [60000, 15, 2, 45], "std_dev": [12000, 3, 0.7, 6]},
+        "Counter_Strike": {"mean": [40000, 8, 1, 30], "std_dev": [8000, 1.5, 0.3, 4]},
+        "Valorant": {"mean": [45000, 12, 1.8, 40], "std_dev": [9000, 2.5, 0.4, 6]},
+        "Mobile_Legends": {"mean": [55000, 20, 2.5, 25], "std_dev": [11000, 4, 0.8, 3]},
+    }
+
+
 # Streamlit app
 st.set_page_config(page_title="Synthetic Data Generator", page_icon="📊")
 
-st.header("Synthetic Data Generator")
-st.markdown("---")
-
+st.title("Synthetic Data Generator")
+st.write("Easily generate synthetic datasets for testing and experimentation.")
 
 # Input for feature names
-st.subheader("Step 1: Define Features")
-features = st.text_input("Enter feature names separated by commas (e.g., feature1, feature2, feature3):")
-if features:
-    feature_list = [f.strip() for f in features.split(",")]
-else:
-    feature_list = []
+st.header("Step 1: Define Features")
+feature_input = st.text_input(
+    "Enter feature names separated by commas (default: average_viewership, player_count, prize_pool, game_duration):",
+    value=", ".join(st.session_state.features),
+)
+st.session_state.features = [f.strip() for f in feature_input.split(",")]
 
 # Input for class settings
-st.subheader("Step 2: Define Classes and Settings")
-class_settings = {}
-class_names = st.text_input("Enter class names separated by commas (e.g., ClassA, ClassB):")
-if class_names:
-    class_list = [c.strip() for c in class_names.split(",")]
+st.header("Step 2: Define Classes and Settings")
+class_names = st.text_input(
+    "Enter class names separated by commas (default: League_of_Legends, Dota_2, Counter_Strike, Valorant, Mobile_Legends):",
+    value=", ".join(st.session_state.class_settings.keys()),
+)
+class_list = [c.strip() for c in class_names.split(",")]
 
-    for class_name in class_list:
-        with st.expander(f"Settings for {class_name}", expanded=False):
-            means = []
-            std_devs = []
-            for feature in feature_list:
-                mean = st.number_input(
-                    f"Mean for {feature} ({class_name}):",
-                    value=np.random.uniform(0, 10),
+# Update or create settings for classes
+for class_name in class_list:
+    if class_name not in st.session_state.class_settings:
+        st.session_state.class_settings[class_name] = {
+            "mean": [np.random.uniform(0, 10) for _ in st.session_state.features],
+            "std_dev": [np.random.uniform(1, 5) for _ in st.session_state.features],
+        }
+
+for class_name, settings in st.session_state.class_settings.items():
+    if class_name in class_list:
+        with st.expander(f"Settings for {class_name}"):
+            cols = st.columns(2)
+            mean_list = []
+            std_dev_list = []
+            for feature, mean, std_dev in zip(st.session_state.features, settings["mean"], settings["std_dev"]):
+                mean_val = cols[0].number_input(
+                    f"Mean for {feature}",
+                    value=mean,
                     key=f"{class_name}_{feature}_mean",
                 )
-                std_dev = st.number_input(
-                    f"Std. Dev for {feature} ({class_name}):",
-                    value=np.random.uniform(1, 5),
+                std_dev_val = cols[1].number_input(
+                    f"Std. Dev for {feature}",
+                    value=std_dev,
                     key=f"{class_name}_{feature}_std_dev",
                 )
-                means.append(mean)
-                std_devs.append(std_dev)
-            class_settings[class_name] = {"mean": means, "std_dev": std_devs}
+                mean_list.append(mean_val)
+                std_dev_list.append(std_dev_val)
+            st.session_state.class_settings[class_name]["mean"] = mean_list
+            st.session_state.class_settings[class_name]["std_dev"] = std_dev_list
 
 # Total number of samples
-st.subheader("Step 3: Generate Data")
+st.header("Step 3: Generate Data")
 total_samples = st.number_input("Total number of samples for the dataset:", min_value=1, value=1000, step=1)
 
 # Generate data button
 if st.button("Generate Data"):
-    if not feature_list or not class_list or not class_settings:
-        st.error("Please define features, classes, and their settings.")
+    if not st.session_state.features or not class_list:
+        st.error("Please define features and classes.")
     else:
-        synthetic_data, samples_per_class = generate_synthetic_data(feature_list, class_settings, total_samples)
+        synthetic_data, samples_per_class = generate_synthetic_data(
+            st.session_state.features, st.session_state.class_settings, total_samples
+        )
         st.success("Synthetic data generated successfully!")
 
         # Display samples per class
