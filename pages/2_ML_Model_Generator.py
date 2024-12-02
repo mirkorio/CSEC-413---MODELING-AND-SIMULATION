@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 
 # Set the page configuration
 st.set_page_config(
@@ -23,12 +24,16 @@ if uploaded_file is not None:
         
         # Display dataset info
         st.subheader("Dataset Information")
-        st.write(f"**Shape of Data:** {data.shape}")
-        st.write(f"**Columns:** {list(data.columns)}")
-        
-        # Display a preview of the dataset
+        info_dict = {
+            column: f"{data[column].dtype}({data[column].count()})"
+            for column in data.columns
+        }
+        info_dict["Total"] = f"np.int64({data.shape[0]})"
+        st.json(info_dict)
+
+        # Display all data
         st.subheader("Dataset Preview")
-        st.dataframe(data.head())
+        st.dataframe(data)
 
     except Exception as e:
         st.error(f"An error occurred while reading the file: {e}")
