@@ -62,16 +62,19 @@ if class_names:
             means = []
             std_devs = []
             for feature in feature_list:
-                mean = st.number_input(
-                    f"Mean for {feature} ({class_name}):",
-                    value=np.random.uniform(0, 10),
-                    key=f"{class_name}_{feature}_mean",
-                )
-                std_dev = st.number_input(
-                    f"Std. Dev for {feature} ({class_name}):",
-                    value=np.random.uniform(1, 5),
-                    key=f"{class_name}_{feature}_std_dev",
-                )
+                cols = st.columns(2)  # Two columns for side-by-side inputs
+                with cols[0]:
+                    mean = st.number_input(
+                        f"Mean for {feature} ({class_name}):",
+                        value=np.random.uniform(0, 10),
+                        key=f"{class_name}_{feature}_mean",
+                    )
+                with cols[1]:
+                    std_dev = st.number_input(
+                        f"Std. Dev for {feature} ({class_name}):",
+                        value=np.random.uniform(1, 5),
+                        key=f"{class_name}_{feature}_std_dev",
+                    )
                 means.append(mean)
                 std_devs.append(std_dev)
             class_settings[class_name] = {"mean": means, "std_dev": std_devs}
