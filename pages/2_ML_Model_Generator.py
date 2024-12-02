@@ -21,10 +21,14 @@ if uploaded_file is not None:
         # Load the data
         data = pd.read_csv(uploaded_file)
         
-        # Display all data in larger view
-        st.subheader("Data Preview")
-        st.write("Below is the full dataset. Scroll to view all rows and columns.")
-        st.dataframe(uploaded_file, use_container_width=True)
+        # Display dataset info
+        st.subheader("Dataset Information")
+        st.write(f"**Shape of Data:** {data.shape}")
+        st.write(f"**Columns:** {list(data.columns)}")
+        
+        # Display a preview of the dataset
+        st.subheader("Dataset Preview")
+        st.dataframe(data.head())
 
     except Exception as e:
         st.error(f"An error occurred while reading the file: {e}")
