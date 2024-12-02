@@ -30,11 +30,9 @@ if uploaded_file is not None:
             with st.expander("Dataset Information"):
                 st.write(f"**Number of Rows:** {data.shape[0]}")
                 st.write(f"**Number of Columns:** {data.shape[1]}")
-                
-                st.write(f"**Columns:** {list(data.columns)}")
-                
-                # Include classes for each column in the specified format
-                st.write("### Classes (Unique Values)")
+                #Feature
+                st.write(f"**Features:** {list(data.columns)}")
+                #
                 for col in data.columns:
                     unique_values = data[col].unique()
                     unique_count = data[col].nunique()
