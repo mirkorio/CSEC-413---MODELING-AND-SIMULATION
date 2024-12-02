@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 
 
+# Function to generate synthetic data
 def generate_synthetic_data(features, class_settings, total_samples):
     """Generates synthetic data with specified settings."""
     class_names = list(class_settings.keys())
@@ -35,6 +36,17 @@ def generate_synthetic_data(features, class_settings, total_samples):
     return df, samples_per_class
 
 
+# Initialize session state
+if "features" not in st.session_state:
+    st.session_state["features"] = []
+if "class_settings" not in st.session_state:
+    st.session_state["class_settings"] = {}
+if "synthetic_data" not in st.session_state:
+    st.session_state["synthetic_data"] = None
+if "samples_per_class" not in st.session_state:
+    st.session_state["samples_per_class"] = None
+
+
 # Streamlit app
 st.set_page_config(page_title="Synthetic Data Generator", page_icon="📊")
 
@@ -47,8 +59,9 @@ st.subheader("Step 1: Define Features")
 features = st.text_input("Enter feature names separated by commas (e.g., feature1, feature2, feature3):")
 if features:
     feature_list = [f.strip() for f in features.split(",")]
+    st.session_state["features"] = feature_list
 else:
-    feature_list = []
+    feature_list = st.session_state["features"]
 
 # Input for class settings
 st.subheader("Step 2: Define Classes and Settings")
@@ -78,6 +91,10 @@ if class_names:
                 means.append(mean)
                 std_devs.append(std_dev)
             class_settings[class_name] = {"mean": means, "std_dev": std_devs}
+    st.session_state["class_settings"] = class_settings
+else:
+    class_list = list(st.session_state["class_settings"].keys())
+    class_settings = st.session_state["class_settings"]
 
 # Total number of samples
 st.subheader("Step 3: Generate Data")
@@ -91,22 +108,31 @@ if st.button("Generate Data"):
         synthetic_data, samples_per_class = generate_synthetic_data(feature_list, class_settings, total_samples)
         st.success("Synthetic data generated successfully!")
 
-        # Display samples per class
-        st.subheader("Samples Per Class")
-        class_counts = {class_name: count for class_name, count in zip(class_list, samples_per_class)}
-        class_counts["Total"] = sum(samples_per_class)
-        st.write(class_counts)
+        # Save to session state
+        st.session_state["synthetic_data"] = synthetic_data
+        st.session_state["samples_per_class"] = samples_per_class
 
-        # Display all data in larger view
-        st.subheader("Data Preview")
-        st.write("Below is the full dataset. Scroll to view all rows and columns.")
-        st.dataframe(synthetic_data, use_container_width=True)
+# Display data if it exists
+if st.session_state["synthetic_data"] is not None:
+    synthetic_data = st.session_state["synthetic_data"]
+    samples_per_class = st.session_state["samples_per_class"]
 
-        # Download data as CSV
-        csv_data = synthetic_data.to_csv(index=False).encode("utf-8")
-        st.download_button(
-            label="Download Data as CSV",
-            data=csv_data,
-            file_name="synthetic_data.csv",
-            mime="text/csv",
-        )
+    # Display samples per class
+    st.subheader("Samples Per Class")
+    class_counts = {class_name: count for class_name, count in zip(class_list, samples_per_class)}
+    class_counts["Total"] = sum(samples_per_class)
+    st.write(class_counts)
+
+    # Display all data in larger view
+    st.subheader("Data Preview")
+    st.write("Below is the full dataset. Scroll to view all rows and columns.")
+    st.dataframe(synthetic_data, use_container_width=True)
+
+    # Download data as CSV
+    csv_data = synthetic_data.to_csv(index=False).encode("utf-8")
+    st.download_button(
+        label="Download Data as CSV",
+        data=csv_data,
+        file_name="synthetic_data.csv",
+        mime="text/csv",
+    )
