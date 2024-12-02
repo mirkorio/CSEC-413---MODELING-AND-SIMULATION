@@ -6,8 +6,11 @@ import pandas as pd
 def generate_synthetic_data(features, class_settings, total_samples):
     """Generates synthetic data with specified settings."""
     class_names = list(class_settings.keys())
+    
+    # Randomly distribute samples per class, ensuring they sum up to total_samples
     proportions = np.random.dirichlet(np.ones(len(class_names)), size=1).flatten()
     samples_per_class = (proportions * total_samples).astype(int)
+    samples_per_class[-1] += total_samples - np.sum(samples_per_class)  # Adjust the last class to match the total
 
     data = []
     labels = []
@@ -35,7 +38,7 @@ def generate_synthetic_data(features, class_settings, total_samples):
 # Streamlit app
 st.set_page_config(page_title="Synthetic Data Generator", page_icon="📊")
 
-st.title("Synthetic Data Generator")
+st.header("Synthetic Data Generator")
 st.markdown("---")
 
 
@@ -88,6 +91,7 @@ if st.button("Generate Data"):
         # Display samples per class
         st.subheader("Samples Per Class")
         class_counts = {class_name: count for class_name, count in zip(class_list, samples_per_class)}
+        class_counts["Total"] = sum(samples_per_class)
         st.write(class_counts)
 
         # Display all data in larger view
