@@ -36,10 +36,11 @@ def generate_synthetic_data(features, class_settings, total_samples):
 st.set_page_config(page_title="Synthetic Data Generator", page_icon="📊")
 
 st.title("Synthetic Data Generator")
-st.write("Easily generate synthetic datasets for testing and experimentation.")
+st.markdown("---")
+
 
 # Input for feature names
-st.header("Step 1: Define Features")
+st.subheader("Step 1: Define Features")
 features = st.text_input("Enter feature names separated by commas (e.g., feature1, feature2, feature3):")
 if features:
     feature_list = [f.strip() for f in features.split(",")]
@@ -47,7 +48,7 @@ else:
     feature_list = []
 
 # Input for class settings
-st.header("Step 2: Define Classes and Settings")
+st.subheader("Step 2: Define Classes and Settings")
 class_settings = {}
 class_names = st.text_input("Enter class names separated by commas (e.g., ClassA, ClassB):")
 if class_names:
@@ -73,7 +74,7 @@ if class_names:
             class_settings[class_name] = {"mean": means, "std_dev": std_devs}
 
 # Total number of samples
-st.header("Step 3: Generate Data")
+st.subheader("Step 3: Generate Data")
 total_samples = st.number_input("Total number of samples for the dataset:", min_value=1, value=1000, step=1)
 
 # Generate data button
