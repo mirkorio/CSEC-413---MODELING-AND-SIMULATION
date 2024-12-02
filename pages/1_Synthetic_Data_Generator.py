@@ -74,15 +74,16 @@ if class_names:
                 with cols[0]:
                     mean = st.number_input(
                         f"Mean for {feature} ({class_name}):",
-                        value=means[i] if means else np.random.uniform(0, 10),
+                        value=means[i] if i < len(means) else np.random.uniform(0, 10),
                         key=f"{class_name}_{feature}_mean",
                     )
                 with cols[1]:
                     std_dev = st.number_input(
                         f"Std. Dev for {feature} ({class_name}):",
-                        value=std_devs[i] if std_devs else np.random.uniform(1, 5),
+                        value=std_devs[i] if i < len(std_devs) else np.random.uniform(1, 5),
                         key=f"{class_name}_{feature}_std_dev",
                     )
+    
                 # Update means and std_devs in session state
                 if i >= len(means):
                     means.append(mean)
