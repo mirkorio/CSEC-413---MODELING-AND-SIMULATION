@@ -50,9 +50,4 @@ if uploaded_file is not None:
 
 # Footer or placeholder for next steps
 st.write("---")
-st.info("""
-🚀 Coming soon:
-- Feature Selection and Engineering
-- Model Training and Evaluation
-- Automated Hyperparameter Tuning
-""")
+st.info(""" Work in progress.""")
