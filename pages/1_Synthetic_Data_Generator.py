@@ -2,29 +2,35 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 
-def generate_synthetic_data(features, class_settings, n_samples_per_class):
+
+def generate_synthetic_data(features, class_settings, total_samples):
     """Generates synthetic data with specified settings."""
+    class_names = list(class_settings.keys())
+    proportions = np.random.dirichlet(np.ones(len(class_names)), size=1).flatten()
+    samples_per_class = (proportions * total_samples).astype(int)
+
     data = []
     labels = []
 
-    for class_name, settings in class_settings.items():
+    for class_name, samples, settings in zip(class_names, samples_per_class, class_settings.values()):
         means = settings["mean"]
         std_devs = settings["std_dev"]
 
         class_data = np.random.normal(
             loc=means,
             scale=std_devs,
-            size=(n_samples_per_class, len(features))
+            size=(samples, len(features))
         )
         data.append(class_data)
-        labels.extend([class_name] * n_samples_per_class)
+        labels.extend([class_name] * samples)
 
     data = np.vstack(data)
     labels = np.array(labels)
 
     df = pd.DataFrame(data, columns=features)
     df["Class"] = labels
-    return df
+    return df, samples_per_class
+
 
 # Streamlit app
 st.set_page_config(page_title="Synthetic Data Generator", page_icon="📊")
@@ -66,17 +72,22 @@ if class_names:
                 std_devs.append(std_dev)
             class_settings[class_name] = {"mean": means, "std_dev": std_devs}
 
-# Number of samples per class
+# Total number of samples
 st.header("Step 3: Generate Data")
-n_samples = st.number_input("Number of samples per class:", min_value=1, value=100, step=1)
+total_samples = st.number_input("Total number of samples for the dataset:", min_value=1, value=1000, step=1)
 
 # Generate data button
 if st.button("Generate Data"):
     if not feature_list or not class_list or not class_settings:
         st.error("Please define features, classes, and their settings.")
     else:
-        synthetic_data = generate_synthetic_data(feature_list, class_settings, n_samples)
+        synthetic_data, samples_per_class = generate_synthetic_data(feature_list, class_settings, total_samples)
         st.success("Synthetic data generated successfully!")
+
+        # Display samples per class
+        st.subheader("Samples Per Class")
+        class_counts = {class_name: count for class_name, count in zip(class_list, samples_per_class)}
+        st.write(class_counts)
 
         # Display data preview
         st.subheader("Data Preview")
