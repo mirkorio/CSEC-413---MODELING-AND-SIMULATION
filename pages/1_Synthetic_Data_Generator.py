@@ -106,7 +106,7 @@ if class_names:
 st.subheader("Generate Data")
 total_samples = st.number_input("Total number of samples for the dataset:", min_value=1, value=1000, step=1,
                                 key="total_samples", 
-                                help="Total number of samples to generate across all classes.")
+                                )
 
 # Generate data button
 if st.button("Generate Data"):
