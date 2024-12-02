@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
 
 # Set the page configuration
 st.set_page_config(
@@ -24,32 +23,12 @@ if uploaded_file is not None:
         
         # Display dataset info
         st.subheader("Dataset Information")
+        st.write(f"**Shape of Data:** {data.shape}")
+        st.write(f"**Columns:** {list(data.columns)}")
         
-        # Number of rows and columns
-        st.write(f"**Shape of Dataset:** {data.shape[0]} rows, {data.shape[1]} columns")
-        
-        # Column names, data types, and non-null counts
-        column_info = {
-            column: {
-                "Data Type": str(data[column].dtype),
-                "Non-Null Count": data[column].count()
-            }
-            for column in data.columns
-        }
-        st.write("**Column Details:**")
-        st.json(column_info)
-        
-        # Memory usage
-        memory_usage = data.memory_usage(deep=True).sum() / 1024 ** 2  # Convert bytes to MB
-        st.write(f"**Memory Usage:** {memory_usage:.2f} MB")
-        
-        # Statistical summary
-        st.write("**Statistical Summary (Numerical Columns):**")
-        st.dataframe(data.describe())
-        
-        # Display all data
+        # Display a preview of the dataset
         st.subheader("Dataset Preview")
-        st.dataframe(data)
+        st.dataframe(data.head())
 
     except Exception as e:
         st.error(f"An error occurred while reading the file: {e}")
