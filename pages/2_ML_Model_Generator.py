@@ -24,13 +24,29 @@ if uploaded_file is not None:
         
         # Display dataset info
         st.subheader("Dataset Information")
-        info_dict = {
-            column: f"{data[column].dtype}({data[column].count()})"
+        
+        # Number of rows and columns
+        st.write(f"**Shape of Dataset:** {data.shape[0]} rows, {data.shape[1]} columns")
+        
+        # Column names, data types, and non-null counts
+        column_info = {
+            column: {
+                "Data Type": str(data[column].dtype),
+                "Non-Null Count": data[column].count()
+            }
             for column in data.columns
         }
-        info_dict["Total"] = f"np.int64({data.shape[0]})"
-        st.json(info_dict)
-
+        st.write("**Column Details:**")
+        st.json(column_info)
+        
+        # Memory usage
+        memory_usage = data.memory_usage(deep=True).sum() / 1024 ** 2  # Convert bytes to MB
+        st.write(f"**Memory Usage:** {memory_usage:.2f} MB")
+        
+        # Statistical summary
+        st.write("**Statistical Summary (Numerical Columns):**")
+        st.dataframe(data.describe())
+        
         # Display all data
         st.subheader("Dataset Preview")
         st.dataframe(data)
