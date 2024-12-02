@@ -90,9 +90,10 @@ if st.button("Generate Data"):
         class_counts = {class_name: count for class_name, count in zip(class_list, samples_per_class)}
         st.write(class_counts)
 
-        # Display data preview
+        # Display all data in larger view
         st.subheader("Data Preview")
-        st.dataframe(synthetic_data.head())
+        st.write("Below is the full dataset. Scroll to view all rows and columns.")
+        st.dataframe(synthetic_data, use_container_width=True)
 
         # Download data as CSV
         csv_data = synthetic_data.to_csv(index=False).encode("utf-8")
