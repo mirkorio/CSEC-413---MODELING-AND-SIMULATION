@@ -37,61 +37,6 @@ if uploaded_file is not None:
             with st.expander("Dataset Preview"):
                 st.dataframe(data)
 
-
-        # Feature Selection and Visualization
-        st.header("Feature Visualization")
-        st.subheader("Feature Selection")
-        target_column = st.selectbox("Select the target/class column (for coloring):", data.columns)
-
-        # Visualization Type
-        viz_type = st.radio("Select the type of visualization:", ["2D", "3D"])
-
-        if viz_type == "2D":
-            col_x, col_y = st.columns(2)
-
-            with col_x:
-                x_axis = st.selectbox("X-axis:", data.columns, index=0)
-
-            with col_y:
-                y_axis = st.selectbox("Y-axis:", data.columns, index=1)
-
-            fig_2d = px.scatter(
-                data,
-                x=x_axis,
-                y=y_axis,
-                color=target_column,
-                title="2D Feature Visualization",
-                labels={x_axis: x_axis, y_axis: y_axis},
-                template="plotly_dark" if st.session_state.get("theme", "light") == "dark" else "plotly"
-            )
-            st.plotly_chart(fig_2d, use_container_width=True)
-
-        elif viz_type == "3D":
-            col_x, col_y, col_z = st.columns(3)
-
-            with col_x:
-                x_axis = st.selectbox("X-axis (3D):", data.columns, index=0)
-
-            with col_y:
-                y_axis = st.selectbox("Y-axis (3D):", data.columns, index=1)
-
-            with col_z:
-                z_axis = st.selectbox("Z-axis (3D):", data.columns, index=2)
-
-            fig_3d = px.scatter_3d(
-                data,
-                x=x_axis,
-                y=y_axis,
-                z=z_axis,
-                color=target_column,
-                title="3D Feature Visualization",
-                labels={x_axis: x_axis, y_axis: y_axis, z_axis: z_axis},
-                template="plotly_dark" if st.session_state.get("theme", "light") == "dark" else "plotly"
-            )
-            fig_3d.update_traces(marker=dict(size=5))
-            st.plotly_chart(fig_3d, use_container_width=True)
-
-
         # Dataset Split Configuration and Info
         st.header("Dataset Split Configuration and Information")
         config_col, info_col = st.columns(2)
@@ -120,6 +65,58 @@ if uploaded_file is not None:
             st.metric(label="Training Samples", value=f"{train_samples} ({round(train_samples / total_samples * 100)}%)")
             st.metric(label="Testing Samples", value=f"{test_samples} ({round(test_samples / total_samples * 100)}%)")
 
+        # Feature Visualization Section
+        with st.expander("Feature Visualization", expanded=True):
+            st.subheader("Feature Selection")
+            target_column = st.selectbox("Select the target/class column (for coloring):", data.columns)
+
+            # Visualization Type
+            viz_type = st.radio("Select the type of visualization:", ["2D", "3D"])
+
+            if viz_type == "2D":
+                col_x, col_y = st.columns(2)
+
+                with col_x:
+                    x_axis = st.selectbox("X-axis:", data.columns, index=0)
+
+                with col_y:
+                    y_axis = st.selectbox("Y-axis:", data.columns, index=1)
+
+                fig_2d = px.scatter(
+                    data,
+                    x=x_axis,
+                    y=y_axis,
+                    color=target_column,
+                    title="2D Feature Visualization",
+                    labels={x_axis: x_axis, y_axis: y_axis},
+                    template="plotly_dark" if st.session_state.get("theme", "light") == "dark" else "plotly"
+                )
+                st.plotly_chart(fig_2d, use_container_width=True)
+
+            elif viz_type == "3D":
+                col_x, col_y, col_z = st.columns(3)
+
+                with col_x:
+                    x_axis = st.selectbox("X-axis (3D):", data.columns, index=0)
+
+                with col_y:
+                    y_axis = st.selectbox("Y-axis (3D):", data.columns, index=1)
+
+                with col_z:
+                    z_axis = st.selectbox("Z-axis (3D):", data.columns, index=2)
+
+                fig_3d = px.scatter_3d(
+                    data,
+                    x=x_axis,
+                    y=y_axis,
+                    z=z_axis,
+                    color=target_column,
+                    title="3D Feature Visualization",
+                    labels={x_axis: x_axis, y_axis: y_axis, z_axis: z_axis},
+                    template="plotly_dark" if st.session_state.get("theme", "light") == "dark" else "plotly"
+                )
+                fig_3d.update_traces(marker=dict(size=5))
+                st.plotly_chart(fig_3d, use_container_width=True)
 
     except Exception as e:
         st.error("An error occurred while processing the file. Ensure it's a valid CSV file.")
