@@ -51,11 +51,12 @@ if uploaded_file is not None:
         with config_col:
             st.subheader("Test Size Configuration")
             test_percentage = st.slider(
-                "Test Data Percentage",
+                "Test Data Percentage (%)",
                 min_value=10,
                 max_value=50,
                 value=20,
-                step=5
+                step=5,
+                format="%d%%"  # Add % sign to slider values
             )
             st.caption("Select the percentage of data used for testing.")
 
