@@ -8,7 +8,7 @@ st.set_page_config(
 )
 
 # Title
-st.header("Modeling and Simulation with Python")
+st.title("Modeling and Simulation with Python")
 st.markdown("---")
 
 # Introduction Section

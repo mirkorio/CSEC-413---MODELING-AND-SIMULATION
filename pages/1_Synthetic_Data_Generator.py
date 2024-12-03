@@ -41,7 +41,7 @@ def generate_synthetic_data(features, class_settings, total_samples):
     return df, samples_per_class
 
 
-st.header("Synthetic Data Generator")
+st.title("Synthetic Data Generator")
 st.markdown("---")
 
 # Initialize session state if not already set
