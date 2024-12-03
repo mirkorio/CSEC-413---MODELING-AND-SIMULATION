@@ -11,6 +11,7 @@ st.set_page_config(
 
 # Title of the app
 st.title("ML Model Generator")
+st.write("---")
 
 # Section for uploading a CSV file
 st.header("Upload Your Dataset")
