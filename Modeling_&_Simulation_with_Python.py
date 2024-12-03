@@ -3,8 +3,8 @@ import streamlit as st
 # Page Configuration
 st.set_page_config(
     page_title="Modeling and Simulation with Python",
-    #page_icon="📘",
-    layout="centered"
+    page_icon="📘",
+    layout="wide"
 )
 
 # Title
