@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
 from sklearn.model_selection import train_test_split
 
 # Set the page configuration
@@ -51,29 +50,35 @@ if uploaded_file is not None:
 
         with config_col:
             st.subheader("Train/Test Split Configuration")
-            split_ratio = st.slider(
-                "Split Ratio (Train %)",
-                min_value=0.1,
-                max_value=0.5,
-                value=0.2,
-                step=0.05,
-                label_visibility="collapsed"  # Hides the main slider label
+            split_percentage = st.slider(
+                "Train Data Percentage",
+                min_value=10,
+                max_value=50,
+                value=20,
+                step=5
             )
             st.caption("Select the percentage of data used for training.")
 
         with info_col:
+            # Convert split percentage to ratio
+            split_ratio = split_percentage / 100
+
             # Split the dataset
             train_data, test_data = train_test_split(data, test_size=1 - split_ratio, random_state=42)
             
-            # Display split info
-            st.subheader("Dataset Split Information")
+            # Calculate dataset stats
             total_samples = data.shape[0]
             train_samples = train_data.shape[0]
             test_samples = test_data.shape[0]
             
+            train_percentage = round((train_samples / total_samples) * 100, 2)
+            test_percentage = round((test_samples / total_samples) * 100, 2)
+
+            # Display split info
+            st.subheader("Dataset Split Information")
             st.metric(label="Total Samples", value=total_samples)
-            st.metric(label="Training Samples", value=train_samples)
-            st.metric(label="Testing Samples", value=test_samples)
+            st.metric(label="Training Samples", value=f"{train_samples} ({train_percentage}%)")
+            st.metric(label="Testing Samples", value=f"{test_samples} ({test_percentage}%)")
 
     except Exception as e:
         st.error("An error occurred while reading the file. Ensure it's a valid CSV file.")
