@@ -71,8 +71,8 @@ if uploaded_file is not None:
             train_samples = train_data.shape[0]
             test_samples = test_data.shape[0]
             
-            train_percentage = round((train_samples / total_samples) * 100, 2)
-            test_percentage_calculated = round((test_samples / total_samples) * 100, 2)
+            train_percentage = round((train_samples / total_samples) * 100)
+            test_percentage_calculated = round((test_samples / total_samples) * 100)
 
             # Display split info
             st.subheader("Dataset Split Information")
