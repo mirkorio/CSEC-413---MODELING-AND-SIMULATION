@@ -37,33 +37,6 @@ if uploaded_file is not None:
             with st.expander("Dataset Preview"):
                 st.dataframe(data)
 
-        # Dataset Split Configuration and Info
-        st.header("Dataset Split Configuration and Information")
-        config_col, info_col = st.columns(2)
-
-        with config_col:
-            st.subheader("Test Size Configuration")
-            test_percentage = st.slider(
-                "Test Data Percentage (%)",
-                min_value=10,
-                max_value=50,
-                value=20,
-                step=5,
-                format="%d%%"
-            )
-            st.caption("Select the percentage of data used for testing.")
-
-        with info_col:
-            test_ratio = test_percentage / 100
-            train_data, test_data = train_test_split(data, test_size=test_ratio, random_state=42)
-            total_samples = data.shape[0]
-            train_samples = train_data.shape[0]
-            test_samples = test_data.shape[0]
-
-            st.subheader("Dataset Split Information")
-            st.metric(label="Total Samples", value=total_samples)
-            st.metric(label="Training Samples", value=f"{train_samples} ({round(train_samples / total_samples * 100)}%)")
-            st.metric(label="Testing Samples", value=f"{test_samples} ({round(test_samples / total_samples * 100)}%)")
 
         # Feature Selection and Visualization
         st.header("Feature Visualization")
@@ -117,6 +90,36 @@ if uploaded_file is not None:
             )
             fig_3d.update_traces(marker=dict(size=5))
             st.plotly_chart(fig_3d, use_container_width=True)
+
+
+        # Dataset Split Configuration and Info
+        st.header("Dataset Split Configuration and Information")
+        config_col, info_col = st.columns(2)
+
+        with config_col:
+            st.subheader("Test Size Configuration")
+            test_percentage = st.slider(
+                "Test Data Percentage (%)",
+                min_value=10,
+                max_value=50,
+                value=20,
+                step=5,
+                format="%d%%"
+            )
+            st.caption("Select the percentage of data used for testing.")
+
+        with info_col:
+            test_ratio = test_percentage / 100
+            train_data, test_data = train_test_split(data, test_size=test_ratio, random_state=42)
+            total_samples = data.shape[0]
+            train_samples = train_data.shape[0]
+            test_samples = test_data.shape[0]
+
+            st.subheader("Dataset Split Information")
+            st.metric(label="Total Samples", value=total_samples)
+            st.metric(label="Training Samples", value=f"{train_samples} ({round(train_samples / total_samples * 100)}%)")
+            st.metric(label="Testing Samples", value=f"{test_samples} ({round(test_samples / total_samples * 100)}%)")
+
 
     except Exception as e:
         st.error("An error occurred while processing the file. Ensure it's a valid CSV file.")
