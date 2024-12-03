@@ -53,8 +53,8 @@ if uploaded_file is not None:
             st.subheader("Train/Test Split Configuration")
             split_ratio = st.slider(
                 "Split Ratio (Train %)",
-                min_value=0.1,
-                max_value=0.5,
+                min_value=10,
+                max_value=50,
                 value=0.2,
                 step=0.05,
                 label_visibility="collapsed"  # Hides the main slider label
