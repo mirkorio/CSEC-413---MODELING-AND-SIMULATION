@@ -74,8 +74,13 @@ if uploaded_file is not None:
         viz_type = st.radio("Select the type of visualization:", ["2D", "3D"])
 
         if viz_type == "2D":
-            x_axis = st.selectbox("Select feature for X-axis:", data.columns, index=0)
-            y_axis = st.selectbox("Select feature for Y-axis:", data.columns, index=1)
+            col_x, col_y = st.columns(2)
+
+            with col_x:
+                x_axis = st.selectbox("X-axis:", data.columns, index=0)
+
+            with col_y:
+                y_axis = st.selectbox("Y-axis:", data.columns, index=1)
 
             fig_2d = px.scatter(
                 data,
@@ -83,15 +88,22 @@ if uploaded_file is not None:
                 y=y_axis,
                 color=target_column,
                 title="2D Feature Visualization",
-                labels={x_axis: "X-axis", y_axis: "Y-axis"},
+                labels={x_axis: x_axis, y_axis: y_axis},
                 template="plotly_dark" if st.session_state.get("theme", "light") == "dark" else "plotly"
             )
             st.plotly_chart(fig_2d, use_container_width=True)
 
         elif viz_type == "3D":
-            x_axis = st.selectbox("Select feature for X-axis (3D):", data.columns, index=0)
-            y_axis = st.selectbox("Select feature for Y-axis (3D):", data.columns, index=1)
-            z_axis = st.selectbox("Select feature for Z-axis (3D):", data.columns, index=2)
+            col_x, col_y, col_z = st.columns(3)
+
+            with col_x:
+                x_axis = st.selectbox("X-axis (3D):", data.columns, index=0)
+
+            with col_y:
+                y_axis = st.selectbox("Y-axis (3D):", data.columns, index=1)
+
+            with col_z:
+                z_axis = st.selectbox("Z-axis (3D):", data.columns, index=2)
 
             fig_3d = px.scatter_3d(
                 data,
@@ -100,7 +112,7 @@ if uploaded_file is not None:
                 z=z_axis,
                 color=target_column,
                 title="3D Feature Visualization",
-                labels={x_axis: "X-axis", y_axis: "Y-axis", z_axis: "Z-axis"},
+                labels={x_axis: x_axis, y_axis: y_axis, z_axis: z_axis},
                 template="plotly_dark" if st.session_state.get("theme", "light") == "dark" else "plotly"
             )
             fig_3d.update_traces(marker=dict(size=5))
