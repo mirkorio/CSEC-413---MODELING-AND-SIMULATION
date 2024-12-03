@@ -45,23 +45,36 @@ if uploaded_file is not None:
             with st.expander("Dataset Preview"):
                 st.dataframe(data)
 
-        # Train/Test Split Configuration
-        st.header("Train/Test Split Configuration")
-        split_ratio = st.slider("Select train/test split ratio", min_value=0.1, max_value=0.9, value=0.8, step=0.1)
-        
-        # Split the dataset
-        train_data, test_data = train_test_split(data, test_size=1-split_ratio, random_state=42)
-        
-        # Display split info
-        st.subheader("Dataset Split Information")
-        total_samples = data.shape[0]
-        train_samples = train_data.shape[0]
-        test_samples = test_data.shape[0]
-        
-        st.write(f"**Total Samples:** {total_samples}")
-        st.write(f"**Training Samples:** {train_samples}")
-        st.write(f"**Testing Samples:** {test_samples}")
-    
+        # Side-by-side Train/Test Split Configuration and Info
+        st.header("Dataset Split Configuration and Information")
+        config_col, info_col = st.columns(2)
+
+        with config_col:
+            st.subheader("Train/Test Split Configuration")
+            split_ratio = st.slider(
+                "Split Ratio (Train %)",
+                min_value=0.1,
+                max_value=0.5,
+                value=0.2,
+                step=0.05,
+                label_visibility="collapsed"  # Hides the main slider label
+            )
+            st.caption("Select the percentage of data used for training.")
+
+        with info_col:
+            # Split the dataset
+            train_data, test_data = train_test_split(data, test_size=1 - split_ratio, random_state=42)
+            
+            # Display split info
+            st.subheader("Dataset Split Information")
+            total_samples = data.shape[0]
+            train_samples = train_data.shape[0]
+            test_samples = test_data.shape[0]
+            
+            st.metric(label="Total Samples", value=total_samples)
+            st.metric(label="Training Samples", value=train_samples)
+            st.metric(label="Testing Samples", value=test_samples)
+
     except Exception as e:
         st.error("An error occurred while reading the file. Ensure it's a valid CSV file.")
         st.write(f"Details: {e}")
