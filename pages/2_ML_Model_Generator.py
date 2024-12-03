@@ -49,22 +49,22 @@ if uploaded_file is not None:
         config_col, info_col = st.columns(2)
 
         with config_col:
-            st.subheader("Train/Test Split Configuration")
-            split_percentage = st.slider(
-                "Train Data Percentage",
+            st.subheader("Test Size Configuration")
+            test_percentage = st.slider(
+                "Test Data Percentage",
                 min_value=10,
                 max_value=50,
                 value=20,
                 step=5
             )
-            st.caption("Select the percentage of data used for training.")
+            st.caption("Select the percentage of data used for testing.")
 
         with info_col:
-            # Convert split percentage to ratio
-            split_ratio = split_percentage / 100
+            # Convert test percentage to ratio
+            test_ratio = test_percentage / 100
 
             # Split the dataset
-            train_data, test_data = train_test_split(data, test_size=1 - split_ratio, random_state=42)
+            train_data, test_data = train_test_split(data, test_size=test_ratio, random_state=42)
             
             # Calculate dataset stats
             total_samples = data.shape[0]
@@ -72,13 +72,13 @@ if uploaded_file is not None:
             test_samples = test_data.shape[0]
             
             train_percentage = round((train_samples / total_samples) * 100, 2)
-            test_percentage = round((test_samples / total_samples) * 100, 2)
+            test_percentage_calculated = round((test_samples / total_samples) * 100, 2)
 
             # Display split info
             st.subheader("Dataset Split Information")
             st.metric(label="Total Samples", value=total_samples)
             st.metric(label="Training Samples", value=f"{train_samples} ({train_percentage}%)")
-            st.metric(label="Testing Samples", value=f"{test_samples} ({test_percentage}%)")
+            st.metric(label="Testing Samples", value=f"{test_samples} ({test_percentage_calculated}%)")
 
     except Exception as e:
         st.error("An error occurred while reading the file. Ensure it's a valid CSV file.")
