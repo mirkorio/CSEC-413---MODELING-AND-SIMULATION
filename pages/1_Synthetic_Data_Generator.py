@@ -2,6 +2,12 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 
+# Page Configuration
+st.set_page_config(
+    page_title="Synthetic Data Generator", 
+    page_icon="📊",
+    layout="wide"
+)
 
 def generate_synthetic_data(features, class_settings, total_samples):
     """Generates synthetic data with specified settings."""
@@ -34,9 +40,6 @@ def generate_synthetic_data(features, class_settings, total_samples):
     df["Class"] = labels
     return df, samples_per_class
 
-
-# Streamlit app
-st.set_page_config(page_title="Synthetic Data Generator", page_icon="📊")
 
 st.header("Synthetic Data Generator")
 st.markdown("---")
