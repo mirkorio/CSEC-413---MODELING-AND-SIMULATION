@@ -46,10 +46,13 @@ if uploaded_file is not None:
     st.subheader("Dataset Statistics")
     st.write(data.describe())
     
-    # Feature selection
-    target_col = st.selectbox("Select Target Column", data.columns)
-    features = data.drop(columns=[target_col])
-    target = data[target_col]
+    if "Class" not in data.columns:
+        st.error("Dataset must contain a 'Class' column as the target variable.")
+        st.stop()
+    else:
+        target_col = "Class"
+        features = data.drop(columns=[target_col])
+        target = data[target_col]
     
     # Train-test split
     test_size = st.slider("Select Test Size (%)", 10, 50, 20) / 100
