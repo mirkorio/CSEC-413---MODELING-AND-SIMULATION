@@ -180,4 +180,4 @@ if model_file is not None or scaler_file is not None:
         
     except Exception as e:
         st.error(f"❌ An unexpected error occurred: {str(e)}")
-        st.info("💡 Please try uploading the files again or contact support if the issue persists.")
+        st.info("💡 Please try uploading the files again or check your internet connection if the issue persists.")
