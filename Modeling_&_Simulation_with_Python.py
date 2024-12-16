@@ -1,11 +1,17 @@
 import streamlit as st
 
+
+
 # Page Configuration
 st.set_page_config(
     page_title="Modeling and Simulation with Python",
     page_icon="📘",
     layout="wide"
 )
+
+# Add logo to sidebar
+gif_url = "https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExazM2cnB2NGYyaHNnc2ZyaThtNXFnYXg5NHJ4dHpodHFpeXk0Y2ZweCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/Eq1sxBSFpIBdUyBAsP/giphy.gif"
+st.sidebar.image(gif_url)
 
 # Title
 st.title("Modeling and Simulation with Python")

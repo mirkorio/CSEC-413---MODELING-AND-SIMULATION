@@ -24,6 +24,7 @@ from sklearn.pipeline import Pipeline
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+
 # Set the page configuration
 st.set_page_config(
     page_title="ML Model Generator",

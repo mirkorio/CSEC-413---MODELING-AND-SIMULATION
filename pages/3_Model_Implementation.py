@@ -1,181 +1,183 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import time
 import pickle
-from sklearn.model_selection import train_test_split, cross_val_score
+import plotly.graph_objects as go
+from sklearn.base import BaseEstimator
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import (
-    accuracy_score,
-    precision_score,
-    recall_score,
-    f1_score,
-    classification_report,
-    confusion_matrix
-)
-from sklearn.linear_model import LogisticRegression
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.svm import SVC
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.pipeline import Pipeline
-import matplotlib.pyplot as plt
-import seaborn as sns
 
-# Set Streamlit page configuration
+# Set the page configuration
 st.set_page_config(
-    page_title="Model Trainer and Evaluator",
-    layout="wide",
-    page_icon="🤖"
+    page_title="ML Model Implementation",
+    page_icon="💻",
+    layout="wide"
 )
 
-st.title("Model Trainer and Evaluator")
+# App Title 
+st.title("ML Model Implementation")
 st.write("---")
 
-# Upload dataset
-uploaded_file = st.file_uploader("Upload your dataset (CSV)", type=["csv"])
+# Create two columns for file uploaders (model and scaler pkl files)
+col1, col2 = st.columns(2)
 
-if uploaded_file is not None:
-    # Load dataset
-    data = pd.read_csv(uploaded_file)
-    st.header("Original Dataset")
-    st.write(data.head())
-    st.write(f"Dataset Shape: {data.shape}")
+# Model uploader in first column
+with col1:
+    model_file = st.file_uploader("Upload Model (.pkl)", type=['pkl'])
     
-    # Dataset statistics
-    st.subheader("Dataset Statistics")
-    st.write(data.describe())
-    
-    if "Class" not in data.columns:
-        st.error("Dataset must contain a 'Class' column as the target variable.")
-        st.stop()
-    else:
-        target_col = "Class"
-        features = data.drop(columns=[target_col])
-        target = data[target_col]
-    
-    # Train-test split
-    test_size = st.slider("Select Test Size (%)", 10, 50, 20) / 100
-    random_state = st.number_input("Set Random State (for reproducibility)", 0, 100, 42)
-    train_x, test_x, train_y, test_y = train_test_split(
-        features, target, test_size=test_size, random_state=random_state
-    )
-    
-    # Models
-    models = {
-        "Logistic Regression": LogisticRegression(max_iter=1000),
-        "K-Nearest Neighbors": KNeighborsClassifier(),
-        "Support Vector Classifier": SVC(probability=True),
-        "Decision Tree": DecisionTreeClassifier(),
-        "Random Forest": RandomForestClassifier()
-    }
+# Scaler uploader in second column
+with col2:
+    scaler_file = st.file_uploader("Upload Scaler (.pkl)", type=['pkl'])
 
-    # Train models
-    if st.button("Train Models"):
-        results = {}
-        best_model_name = None
-        best_model = None
-        best_scaler = None
-        best_metrics = None
-        best_f1 = -1
-        
-        # Training and evaluation
-        for model_name, model in models.items():
-            try:
-                start_time = time.time()
-                pipeline = Pipeline([
-                    ('scaler', StandardScaler()),
-                    ('model', model)
-                ])
-                pipeline.fit(train_x, train_y)
-                predictions = pipeline.predict(test_x)
-                
-                # Calculate metrics
-                acc = accuracy_score(test_y, predictions)
-                prec = precision_score(test_y, predictions, average="weighted")
-                rec = recall_score(test_y, predictions, average="weighted")
-                f1 = f1_score(test_y, predictions, average="weighted")
-                elapsed_time = time.time() - start_time
-                
-                # Save metrics
-                results[model_name] = {
-                    "Accuracy": acc,
-                    "Precision": prec,
-                    "Recall": rec,
-                    "F1-Score": f1,
-                    "Training Time": elapsed_time,
-                    "Status": "Success"
-                }
-                
-                # Track best model
-                if f1 > best_f1:
-                    best_f1 = f1
-                    best_model_name = model_name
-                    best_model = pipeline
-                    best_scaler = pipeline.named_steps["scaler"]
-                    best_metrics = {
-                        "Accuracy": acc,
-                        "Precision": prec,
-                        "Recall": rec,
-                        "F1-Score": f1
-                    }
-            except Exception as e:
-                results[model_name] = {
-                    "Accuracy": None,
-                    "Precision": None,
-                    "Recall": None,
-                    "F1-Score": None,
-                    "Training Time": None,
-                    "Status": f"Failed: {e}"
-                }
-        
-        # Best model performance
-        if best_model_name:
-            st.subheader(f"Best Model: {best_model_name}")
-            st.json(best_metrics)
+def validate_model(model):
+    """Validate if the uploaded file is a valid ML model"""
+    return hasattr(model, 'predict_proba') and hasattr(model, 'predict')
+
+def validate_scaler(scaler):
+    """Validate if the uploaded file is a valid scaler"""
+    return isinstance(scaler, StandardScaler) or (hasattr(scaler, 'transform') and hasattr(scaler, 'fit_transform'))
+
+# Only proceed if both files are uploaded
+if model_file is not None or scaler_file is not None:
+    try:
+        if model_file is None:
+            st.warning("⚠️ Please upload a model file.")
+            st.stop()
+        if scaler_file is None:
+            st.warning("⚠️ Please upload a scaler file.")
+            st.stop()
             
-            # Download the best model and scaler
-            st.download_button(
-                label="Download Best Model",
-                data=pickle.dumps(best_model),
-                file_name="best_model.pkl"
+        # Load the model and scaler
+        try:
+            model = pickle.load(model_file)
+        except Exception as e:
+            st.error("❌ Failed to load model file. Please check if it's a valid pickle file.")
+            st.stop()
+            
+        try:
+            scaler = pickle.load(scaler_file)
+        except Exception as e:
+            st.error("❌ Failed to load scaler file. Please check if it's a valid pickle file.")
+            st.stop()
+        
+        # Validate the uploaded files
+        if not validate_model(model):
+            st.error("❌ Invalid model file! The uploaded file doesn't seem to be a valid machine learning model.")
+            st.info("💡 Hint: Make sure you haven't switched the model and scaler files.")
+            st.stop()
+        
+        if not validate_scaler(scaler):
+            st.error("❌ Invalid scaler file! The uploaded file doesn't seem to be a valid scaler.")
+            st.info("💡 Hint: Make sure you haven't switched the model and scaler files.")
+            st.stop()
+            
+        # Show success message
+        st.success("✅ Model and Scaler files successfully loaded!")
+        
+        st.write("---")
+        
+        # Get feature names from the model
+        try:
+            feature_names = model.feature_names_in_
+        except:
+            try:
+                feature_names = [f"feature_{i}" for i in range(model.n_features_in_)]
+            except:
+                st.error("❌ Could not determine the number of features required by the model.")
+                st.stop()
+        
+        # Initialize session state for feature values if not exists with dummy values
+        if 'feature_values' not in st.session_state:
+            st.session_state.feature_values = {feature: np.random.uniform(0, 100) for feature in feature_names}
+        
+        st.subheader("Enter Feature Values")
+        
+        # Add random generation button at the top
+        if st.button("🎲 Generate Random Values For Prediction"):
+            for feature in feature_names:
+                st.session_state.feature_values[feature] = np.random.uniform(0, 100)
+        
+        # Create input fields in a grid layout
+        feature_values = {}
+        num_cols = 3  # Number of columns in the grid
+        cols = st.columns(num_cols)
+        for idx, feature in enumerate(feature_names):
+            with cols[idx % num_cols]:
+                feature_values[feature] = st.number_input(
+                    feature,
+                    value=st.session_state.feature_values[feature],
+                    format="%.2f"
+                )
+                st.session_state.feature_values[feature] = feature_values[feature]
+        
+        try:
+            # Prepare input data and make prediction
+            X = np.array([list(feature_values.values())])
+            X_scaled = scaler.transform(X)
+            prediction = model.predict_proba(X_scaled)[0]
+        except Exception as e:
+            st.error("❌ Error making prediction. The model or scaler might be incompatible.")
+            st.info("💡 Hint: Check if the model and scaler were trained together and are compatible.")
+            st.stop()
+        
+        st.write("---")
+        st.subheader("Prediction Results")
+        
+        # Create visualization columns
+        viz_col1, viz_col2 = st.columns([1, 1])
+        
+        with viz_col1:
+            # Bar chart for class probabilities
+            classes = model.classes_
+            prob_df = pd.DataFrame({
+                'Class': classes,
+                'Probability': prediction
+            })
+            
+            st.write("Prediction Probabilities by Class")
+            fig = go.Figure(data=[
+                go.Bar(
+                    x=prob_df['Class'],
+                    y=prob_df['Probability'],
+                    marker_color='rgb(30, 144, 255)',
+                    text=prob_df['Probability'].apply(lambda x: f'{x:.1%}'),
+                    textposition='auto',
+                )
+            ])
+            fig.update_layout(
+                yaxis_title="Probability",
+                yaxis_tickformat='.0%',
+                plot_bgcolor='rgba(0,0,0,0)',
+                height=400
             )
-            st.download_button(
-                label="Download Scaler",
-                data=pickle.dumps(best_scaler),
-                file_name="scaler.pkl"
-            )
+            st.plotly_chart(fig, use_container_width=True)
         
-        # Model comparison table
-        st.subheader("Model Comparison")
-        comparison_df = pd.DataFrame(results).T
-        st.dataframe(comparison_df)
+        with viz_col2:
+            # Gauge chart for highest probability
+            max_prob = prediction.max()
+            max_class = classes[prediction.argmax()]
+            
+            fig = go.Figure(go.Indicator(
+                mode="gauge+number",
+                value=max_prob * 100,
+                title={'text': f'Confidence for Class {max_class}'},
+                gauge={
+                    'axis': {'range': [0, 100]},
+                    'bar': {'color': "rgb(30, 144, 255)"},
+                    'steps': [
+                        {'range': [0, 33], 'color': "lightgray"},
+                        {'range': [33, 66], 'color': "gray"},
+                        {'range': [66, 100], 'color': "darkgray"}
+                    ],
+                }
+            ))
+            fig.update_layout(height=400)
+            st.plotly_chart(fig, use_container_width=True)
         
-        # Model performance graph
-        st.subheader("Model Performance Comparison")
-        comparison_df.drop(columns=["Training Time", "Status"]).plot(kind="bar", figsize=(10, 5))
-        plt.xticks(rotation=45)
-        plt.title("Model Metrics")
-        st.pyplot(plt)
+        # Detailed probabilities table
+        st.write("Detailed Class Probabilities:")
+        prob_df['Probability'] = prob_df['Probability'].apply(lambda x: f'{x:.2%}')
+        st.dataframe(prob_df, use_container_width=True)
         
-        # Learning curves and confusion matrices
-        st.subheader("Learning Curves and Confusion Matrices")
-        for model_name, metrics in results.items():
-            if metrics["Status"] == "Success":
-                fig, ax = plt.subplots(1, 2, figsize=(15, 5))
-                
-                # Learning curve
-                scores = cross_val_score(models[model_name], train_x, train_y, cv=5)
-                ax[0].plot(scores)
-                ax[0].set_title(f"Learning Curve: {model_name}")
-                ax[0].set_xlabel("Fold")
-                ax[0].set_ylabel("Accuracy")
-                
-                # Confusion matrix
-                cm = confusion_matrix(test_y, models[model_name].predict(test_x))
-                sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", ax=ax[1])
-                ax[1].set_title(f"Confusion Matrix: {model_name}")
-                ax[1].set_xlabel("Predicted")
-                ax[1].set_ylabel("True")
-                
-                st.pyplot(fig)
+    except Exception as e:
+        st.error(f"❌ An unexpected error occurred: {str(e)}")
+        st.info("💡 Please try uploading the files again or contact support if the issue persists.")

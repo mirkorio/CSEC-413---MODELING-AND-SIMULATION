@@ -2,6 +2,7 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 
+
 # Page Configuration
 st.set_page_config(
     page_title="Synthetic Data Generator", 
