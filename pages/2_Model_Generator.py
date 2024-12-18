@@ -2,9 +2,6 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
-import plotly.express as px
-import time
-import pickle
 from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import (
@@ -21,9 +18,15 @@ from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.pipeline import Pipeline
+from sklearn.ensemble import AdaBoostClassifier
+from sklearn.naive_bayes import GaussianNB
+from sklearn.neural_network import MLPClassifier
+from sklearn.ensemble import GradientBoostingClassifier
 import matplotlib.pyplot as plt
 import seaborn as sns
-
+import plotly.express as px
+import time
+import pickle
 
 # Set the page configuration
 st.set_page_config(
@@ -43,9 +46,15 @@ uploaded_file = st.file_uploader("Upload a CSV file", type=["csv"])
 # If a file is uploaded
 if uploaded_file is not None:
     try:
-        # Load the data
-        data = pd.read_csv(uploaded_file)
-        
+        # Store the uploaded file in session state if it's not already there
+        # or if it's a different file
+        if 'uploaded_data' not in st.session_state or st.session_state.uploaded_data_name != uploaded_file.name:
+            data = pd.read_csv(uploaded_file)
+            st.session_state.uploaded_data = data
+            st.session_state.uploaded_data_name = uploaded_file.name
+        else:
+            data = st.session_state.uploaded_data
+
         # Display dataset information and preview
         col1, col2 = st.columns(2)
 
@@ -125,14 +134,36 @@ if uploaded_file is not None:
                 max_value=50,
                 value=20,
                 step=5,
-                format="%d%%"
+                format="%d%%",
+                key="test_percentage"
             )
             st.caption("Select the percentage of data used for testing.")
             
+            random_state = st.number_input(
+                "Set Random State (for reproducibility)", 
+                0, 
+                100, 
+                42,
+                key="random_state"
+            )
+
+        # Check if test_percentage or random_state has changed
+        if ("previous_test_percentage" not in st.session_state or 
+            "previous_random_state" not in st.session_state or
+            st.session_state.test_percentage != st.session_state.previous_test_percentage or
+            st.session_state.random_state != st.session_state.previous_random_state):
+            
+            # Update previous values
+            st.session_state.previous_test_percentage = st.session_state.test_percentage
+            st.session_state.previous_random_state = st.session_state.random_state
+            
+            # Clear previous model results to trigger recalculation
+            if "model_results" in st.session_state:
+                del st.session_state.model_results
 
         with info_col:
             test_ratio = test_percentage / 100
-            train_data, test_data = train_test_split(data, test_size=test_ratio, random_state=42)
+            train_data, test_data = train_test_split(data, test_size=test_ratio, random_state=random_state)
             total_samples = data.shape[0]
             train_samples = train_data.shape[0]
             test_samples = test_data.shape[0]
@@ -165,9 +196,18 @@ if uploaded_file is not None:
             "K-Nearest Neighbors": KNeighborsClassifier(),
             "Support Vector Classifier": SVC(probability=True),
             "Decision Tree": DecisionTreeClassifier(),
-            "Random Forest": RandomForestClassifier()
+            "Random Forest": RandomForestClassifier(),
+            "AdaBoost": AdaBoostClassifier(
+                n_estimators=100,
+            ),
+            "Gaussian Naive Bayes": GaussianNB(),
+            "Neural Network": MLPClassifier(hidden_layer_sizes=(100, 50), max_iter=1000),
+            "Gradient Boosting": GradientBoostingClassifier(
+                n_estimators=100,
+                learning_rate=0.1,
+                max_depth=3
+            )
         }
-
         # Train models
         if "model_results" not in st.session_state:
             results = {}
@@ -192,7 +232,7 @@ if uploaded_file is not None:
                     
                     # Calculate metrics
                     acc = accuracy_score(test_y, predictions)
-                    prec = precision_score(test_y, predictions, average="weighted")
+                    prec = precision_score(test_y, predictions, average="weighted", zero_division=0)
                     rec = recall_score(test_y, predictions, average="weighted")
                     f1 = f1_score(test_y, predictions, average="weighted")
                     elapsed_time = time.time() - start_time
@@ -308,7 +348,7 @@ if uploaded_file is not None:
             
             st.subheader("Classification Report")
             predictions = best_model.predict(test_x)
-            report = classification_report(test_y, predictions, output_dict=True)
+            report = classification_report(test_y, predictions, zero_division=0, output_dict=True)
             report_df = pd.DataFrame(report).transpose()
             st.dataframe(report_df)
         

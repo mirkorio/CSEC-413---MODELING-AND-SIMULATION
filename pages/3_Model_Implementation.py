@@ -17,16 +17,38 @@ st.set_page_config(
 st.title("ML Model Implementation")
 st.write("---")
 
+# After the initial imports and page config, add these lines
+if 'model' not in st.session_state:
+    st.session_state.model = None
+if 'scaler' not in st.session_state:
+    st.session_state.scaler = None
+
+# After initializing session state variables, add these lines
+model_file = None
+scaler_file = None
+
 # Create two columns for file uploaders (model and scaler pkl files)
 col1, col2 = st.columns(2)
 
 # Model uploader in first column
 with col1:
-    model_file = st.file_uploader("Upload Model (.pkl)", type=['pkl'])
+    if st.session_state.model is None:
+        model_file = st.file_uploader("Upload Model (.pkl)", type=['pkl'])
+    else:
+        st.success("✅ Model already loaded!")
+        if st.button("Clear loaded model"):
+            st.session_state.model = None
+            st.experimental_rerun()
     
 # Scaler uploader in second column
 with col2:
-    scaler_file = st.file_uploader("Upload Scaler (.pkl)", type=['pkl'])
+    if st.session_state.scaler is None:
+        scaler_file = st.file_uploader("Upload Scaler (.pkl)", type=['pkl'])
+    else:
+        st.success("✅ Scaler already loaded!")
+        if st.button("Clear loaded scaler"):
+            st.session_state.scaler = None
+            st.experimental_rerun()
 
 def validate_model(model):
     """Validate if the uploaded file is a valid ML model"""
@@ -37,39 +59,41 @@ def validate_scaler(scaler):
     return isinstance(scaler, StandardScaler) or (hasattr(scaler, 'transform') and hasattr(scaler, 'fit_transform'))
 
 # Only proceed if both files are uploaded
-if model_file is not None or scaler_file is not None:
+if (model_file is not None or st.session_state.model is not None) or (scaler_file is not None or st.session_state.scaler is not None):
     try:
-        if model_file is None:
-            st.warning("⚠️ Please upload a model file.")
-            st.stop()
-        if scaler_file is None:
-            st.warning("⚠️ Please upload a scaler file.")
-            st.stop()
-            
-        # Load the model and scaler
-        try:
-            model = pickle.load(model_file)
-        except Exception as e:
-            st.error("❌ Failed to load model file. Please check if it's a valid pickle file.")
-            st.stop()
-            
-        try:
-            scaler = pickle.load(scaler_file)
-        except Exception as e:
-            st.error("❌ Failed to load scaler file. Please check if it's a valid pickle file.")
-            st.stop()
-        
-        # Validate the uploaded files
-        if not validate_model(model):
+        # Load model if not already in session state
+        if st.session_state.model is None:
+            if model_file is None:
+                st.warning("⚠️ Please upload a model file.")
+                st.stop()
+            try:
+                st.session_state.model = pickle.load(model_file)
+            except Exception as e:
+                st.error("❌ Failed to load model file. Please check if it's a valid pickle file.")
+                st.stop()
+
+        # Load scaler if not already in session state
+        if st.session_state.scaler is None:
+            if scaler_file is None:
+                st.warning("⚠️ Please upload a scaler file.")
+                st.stop()
+            try:
+                st.session_state.scaler = pickle.load(scaler_file)
+            except Exception as e:
+                st.error("❌ Failed to load scaler file. Please check if it's a valid pickle file.")
+                st.stop()
+
+        # Use session state variables instead of local variables
+        if not validate_model(st.session_state.model):
             st.error("❌ Invalid model file! The uploaded file doesn't seem to be a valid machine learning model.")
-            st.info("💡 Hint: Make sure you haven't switched the model and scaler files.")
+            st.session_state.model = None
             st.stop()
         
-        if not validate_scaler(scaler):
+        if not validate_scaler(st.session_state.scaler):
             st.error("❌ Invalid scaler file! The uploaded file doesn't seem to be a valid scaler.")
-            st.info("💡 Hint: Make sure you haven't switched the model and scaler files.")
+            st.session_state.scaler = None
             st.stop()
-            
+
         # Show success message
         st.success("✅ Model and Scaler files successfully loaded!")
         
@@ -77,10 +101,10 @@ if model_file is not None or scaler_file is not None:
         
         # Get feature names from the model
         try:
-            feature_names = model.feature_names_in_
+            feature_names = st.session_state.model.feature_names_in_
         except:
             try:
-                feature_names = [f"feature_{i}" for i in range(model.n_features_in_)]
+                feature_names = [f"feature_{i}" for i in range(st.session_state.model.n_features_in_)]
             except:
                 st.error("❌ Could not determine the number of features required by the model.")
                 st.stop()
@@ -112,8 +136,8 @@ if model_file is not None or scaler_file is not None:
         try:
             # Prepare input data and make prediction
             X = np.array([list(feature_values.values())])
-            X_scaled = scaler.transform(X)
-            prediction = model.predict_proba(X_scaled)[0]
+            X_scaled = st.session_state.scaler.transform(X)
+            prediction = st.session_state.model.predict_proba(X_scaled)[0]
         except Exception as e:
             st.error("❌ Error making prediction. The model or scaler might be incompatible.")
             st.info("💡 Hint: Check if the model and scaler were trained together and are compatible.")
@@ -127,7 +151,7 @@ if model_file is not None or scaler_file is not None:
         
         with viz_col1:
             # Bar chart for class probabilities
-            classes = model.classes_
+            classes = st.session_state.model.classes_
             prob_df = pd.DataFrame({
                 'Class': classes,
                 'Probability': prediction
