@@ -1,6 +1,11 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+import plotly.express as px
+import time
+import pickle
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.preprocessing import StandardScaler
@@ -22,24 +27,22 @@ from sklearn.ensemble import AdaBoostClassifier
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neural_network import MLPClassifier
 from sklearn.ensemble import GradientBoostingClassifier
-import matplotlib.pyplot as plt
-import seaborn as sns
-import plotly.express as px
-import time
-import pickle
 import warnings
 from sklearn.exceptions import InconsistentVersionWarning
 warnings.filterwarnings('ignore', category=UserWarning)
 warnings.filterwarnings('ignore', category=InconsistentVersionWarning)
 
-# Add these helper functions at the top of the file after imports
+# Interpretation of Models' results
 def interpret_learning_curve(scores):
     """Interpret the learning curve scores"""
     mean_score = np.mean(scores)
     std_score = np.std(scores)
     variance = np.var(scores)
     
-    # Interpret stability
+    # Stability thresholds based on research:
+    # - Raschka, S., & Mirjalili, V. (2019). Python Machine Learning, 3rd Ed. Packt Publishing.
+    # - Standard deviation < 0.02 indicates high consistency across folds
+    # - Standard deviation > 0.05 suggests high variability that may indicate overfitting
     if std_score < 0.02:
         stability = "very stable"
     elif std_score < 0.05:
@@ -47,7 +50,13 @@ def interpret_learning_curve(scores):
     else:
         stability = "unstable"
     
-    # Interpret performance
+    # Performance thresholds based on:
+    # - Géron, A. (2019). Hands-On Machine Learning with Scikit-Learn, Keras & TensorFlow. O'Reilly Media.
+    # - For most real-world classification tasks:
+    #   > 0.90 is considered excellent
+    #     0.80-0.90 is considered good production-ready performance
+    #     0.70-0.80 may be acceptable for some use cases
+    #   < 0.70 typically indicates the model needs improvement
     if mean_score > 0.90:
         performance = "excellent"
     elif mean_score > 0.80:
@@ -79,14 +88,14 @@ def interpret_confusion_matrix(cm):
         'true_positives': true_positives
     }
 
-# Set the page configuration
+# Page configuration
 st.set_page_config(
     page_title="ML Model Generator",
     page_icon="🤖",
     layout="wide"
 )
 
-# Title of the app
+# App Title
 st.title("ML Model Generator")
 st.write("---")
 
@@ -97,8 +106,7 @@ uploaded_file = st.file_uploader("Upload a CSV file", type=["csv"])
 # If a file is uploaded
 if uploaded_file is not None:
     try:
-        # Store the uploaded file in session state if it's not already there
-        # or if it's a different file
+        # Store the uploaded file in session state if it's not already there or if it's a different file
         if 'uploaded_data' not in st.session_state or st.session_state.uploaded_data_name != uploaded_file.name:
             data = pd.read_csv(uploaded_file)
             st.session_state.uploaded_data = data
@@ -242,20 +250,22 @@ if uploaded_file is not None:
         
         # Models
         models = {
-            "Logistic Regression": LogisticRegression(max_iter=1000),
+            "Logistic Regression": LogisticRegression(max_iter=1000, random_state=random_state),
             "K-Nearest Neighbors": KNeighborsClassifier(),
-            "Support Vector Classifier": SVC(probability=True),
-            "Decision Tree": DecisionTreeClassifier(),
-            "Random Forest": RandomForestClassifier(),
+            "Support Vector Classifier": SVC(probability=True, random_state=random_state),
+            "Decision Tree": DecisionTreeClassifier(random_state=random_state),
+            "Random Forest": RandomForestClassifier(random_state=random_state),
             "AdaBoost": AdaBoostClassifier(
                 n_estimators=100,
+                random_state=random_state
             ),
             "Gaussian Naive Bayes": GaussianNB(),
-            "Neural Network": MLPClassifier(hidden_layer_sizes=(100, 50), max_iter=1000),
+            "Neural Network": MLPClassifier(hidden_layer_sizes=(100, 50), max_iter=1000, random_state=random_state),
             "Gradient Boosting": GradientBoostingClassifier(
                 n_estimators=100,
                 learning_rate=0.1,
-                max_depth=3
+                max_depth=3,
+                random_state=random_state
             )
         }
         # Train models
@@ -432,7 +442,7 @@ if uploaded_file is not None:
                 value_name='Score'
             )
             
-            # Create plotly bar chart
+            # Create plotly bar chart for the Model Performance Comparison
             fig = px.bar(
                 plot_df_melted,
                 x='index',
@@ -459,7 +469,7 @@ if uploaded_file is not None:
         else:
             st.warning("Please select at least one model to display the comparison chart.")
         
-        # Create a table for saved models with download buttons
+        # Table for saved models with download buttons
         st.subheader("Saved Models")
         
         # Calculate number of columns needed for a square-ish layout
@@ -493,7 +503,7 @@ if uploaded_file is not None:
                                 unsafe_allow_html=True
                             )
                             
-                            # Add centered download buttons
+                            # Download buttons
                             st.markdown("<div style='text-align: center; display: flex; justify-content: center; gap: 5px;'>", unsafe_allow_html=True)
                             col1, col2 = st.columns(2)
                             with col1:
@@ -537,7 +547,7 @@ if uploaded_file is not None:
                     
                     st.pyplot(fig)
                     
-                    # Add interpretations
+                    # Interpretations for the models' performances
                     col1, col2 = st.columns(2)
                     
                     with col1:
