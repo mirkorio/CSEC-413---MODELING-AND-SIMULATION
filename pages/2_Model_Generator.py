@@ -27,9 +27,6 @@ import seaborn as sns
 import plotly.express as px
 import time
 import pickle
-import warnings
-warnings.filterwarnings('ignore', category=UserWarning)
-warnings.filterwarnings('ignore', category=InconsistentVersionWarning)
 
 # Set the page configuration
 st.set_page_config(
@@ -228,10 +225,10 @@ if uploaded_file is not None:
                     pipeline = Pipeline([
                         ('scaler', StandardScaler()),
                         ('model', model)
-                    ], verbose=False)
+                    ])
                     pipeline.fit(train_x, train_y)
                     fitted_pipelines[model_name] = pipeline
-                    predictions = pipeline.predict(test_x.copy())
+                    predictions = pipeline.predict(test_x)
                     
                     # Calculate metrics
                     acc = accuracy_score(test_y, predictions)
@@ -304,11 +301,9 @@ if uploaded_file is not None:
         with col2:
             # Download scaled dataset
             scaler = StandardScaler()
-            numeric_columns = data.select_dtypes(include=['float64', 'int64']).columns
             scaled_data = pd.DataFrame(
-                scaler.fit_transform(data[numeric_columns]),
-                columns=numeric_columns,
-                index=data.index
+                scaler.fit_transform(data.select_dtypes(include=['float64', 'int64'])),
+                columns=data.select_dtypes(include=['float64', 'int64']).columns
             )
             st.download_button(
                 label="Download Scaled Dataset (CSV)",
