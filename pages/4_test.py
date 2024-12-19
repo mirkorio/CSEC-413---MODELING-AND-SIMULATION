@@ -28,6 +28,7 @@ import plotly.express as px
 import time
 import pickle
 import warnings
+from sklearn.exceptions import InconsistentVersionWarning
 warnings.filterwarnings('ignore', category=UserWarning)
 warnings.filterwarnings('ignore', category=InconsistentVersionWarning)
 
