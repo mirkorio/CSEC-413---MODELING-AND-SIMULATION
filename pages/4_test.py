@@ -32,6 +32,55 @@ from sklearn.exceptions import InconsistentVersionWarning
 warnings.filterwarnings('ignore', category=UserWarning)
 warnings.filterwarnings('ignore', category=InconsistentVersionWarning)
 
+# Add these helper functions at the top of the file after imports
+def interpret_learning_curve(scores):
+    """Interpret the learning curve scores"""
+    mean_score = np.mean(scores)
+    std_score = np.std(scores)
+    variance = np.var(scores)
+    
+    # Interpret stability
+    if std_score < 0.02:
+        stability = "very stable"
+    elif std_score < 0.05:
+        stability = "stable"
+    else:
+        stability = "unstable"
+    
+    # Interpret performance
+    if mean_score > 0.90:
+        performance = "excellent"
+    elif mean_score > 0.80:
+        performance = "good"
+    elif mean_score > 0.70:
+        performance = "fair"
+    else:
+        performance = "poor"
+        
+    return {
+        'mean_score': mean_score,
+        'stability': stability,
+        'performance': performance,
+        'variance': variance
+    }
+
+def interpret_confusion_matrix(cm):
+    """Interpret the confusion matrix"""
+    total = np.sum(cm)
+    true_positives = np.diag(cm)
+    false_positives = np.sum(cm, axis=0) - true_positives
+    false_negatives = np.sum(cm, axis=1) - true_positives
+    
+    accuracy = np.sum(true_positives) / total
+    misclassification = 1 - accuracy
+    
+    return {
+        'accuracy': accuracy,
+        'misclassification_rate': misclassification,
+        'total_samples': total,
+        'true_positives': true_positives
+    }
+
 # Set the page configuration
 st.set_page_config(
     page_title="ML Model Generator",
@@ -469,25 +518,57 @@ if uploaded_file is not None:
         st.subheader("Learning Curves and Confusion Matrices")
         for model_name, metrics in results.items():
             if metrics["Status"] == "Success":
-                fig, ax = plt.subplots(1, 2, figsize=(15, 5))
-                
-                # Learning curve using the fitted pipeline
-                pipeline = fitted_pipelines[model_name]
-                scores = cross_val_score(pipeline, train_x, train_y, cv=5)
-                ax[0].plot(scores)
-                ax[0].set_title(f"Learning Curve: {model_name}")
-                ax[0].set_xlabel("Fold")
-                ax[0].set_ylabel("Accuracy")
-                
-                # Confusion matrix using the fitted pipeline
-                predictions = pipeline.predict(test_x)
-                cm = confusion_matrix(test_y, predictions)
-                sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", ax=ax[1])
-                ax[1].set_title(f"Confusion Matrix: {model_name}")
-                ax[1].set_xlabel("Predicted")
-                ax[1].set_ylabel("True")
-                
-                st.pyplot(fig)
+                with st.expander(f"Analysis for {model_name}", expanded=False):
+                    fig, ax = plt.subplots(1, 2, figsize=(15, 5))
+                    
+                    # Learning curve using the fitted pipeline
+                    pipeline = fitted_pipelines[model_name]
+                    scores = cross_val_score(pipeline, train_x, train_y, cv=5)
+                    ax[0].plot(scores)
+                    ax[0].set_title(f"Learning Curve: {model_name}")
+                    ax[0].set_xlabel("Fold")
+                    ax[0].set_ylabel("Accuracy")
+                    
+                    # Confusion matrix using the fitted pipeline
+                    predictions = pipeline.predict(test_x)
+                    cm = confusion_matrix(test_y, predictions)
+                    sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", ax=ax[1])
+                    ax[1].set_title(f"Confusion Matrix: {model_name}")
+                    ax[1].set_xlabel("Predicted")
+                    ax[1].set_ylabel("True")
+                    
+                    st.pyplot(fig)
+                    
+                    # Add interpretations
+                    col1, col2 = st.columns(2)
+                    
+                    with col1:
+                        st.subheader("Learning Curve Analysis")
+                        lc_interpretation = interpret_learning_curve(scores)
+                        st.write(f"""
+                        - Average Performance: {lc_interpretation['mean_score']:.2%}
+                        - Model Stability: {lc_interpretation['stability']}
+                        - Overall Performance: {lc_interpretation['performance']}
+                        - Variance: {lc_interpretation['variance']:.4f}
+                        
+                        **Interpretation:**
+                        This model shows {lc_interpretation['performance']} performance with 
+                        {lc_interpretation['stability']} learning across different data folds.
+                        """)
+                    
+                    with col2:
+                        st.subheader("Confusion Matrix Analysis")
+                        cm_interpretation = interpret_confusion_matrix(cm)
+                        st.write(f"""
+                        - Overall Accuracy: {cm_interpretation['accuracy']:.2%}
+                        - Misclassification Rate: {cm_interpretation['misclassification_rate']:.2%}
+                        - Total Samples Tested: {cm_interpretation['total_samples']}
+                        - Class Balance: {cm_interpretation['true_positives'].sum()/cm_interpretation['total_samples']:.2%} positive class ratio
+                        
+                        **Interpretation:**
+                        The model correctly classified {cm_interpretation['accuracy']:.2%} of the test samples,
+                        with {cm_interpretation['misclassification_rate']:.2%} of samples being misclassified.
+                        """)
 
     except Exception as e:
         st.error("An error occurred while processing the file. Ensure it's a valid CSV file.")
