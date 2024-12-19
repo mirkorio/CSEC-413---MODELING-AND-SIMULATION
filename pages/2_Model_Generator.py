@@ -27,10 +27,7 @@ from sklearn.ensemble import AdaBoostClassifier
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neural_network import MLPClassifier
 from sklearn.ensemble import GradientBoostingClassifier
-import warnings
-from sklearn.exceptions import InconsistentVersionWarning
-warnings.filterwarnings('ignore', category=UserWarning)
-warnings.filterwarnings('ignore', category=InconsistentVersionWarning)
+
 
 # Interpretation of Models' results
 def interpret_learning_curve(scores):

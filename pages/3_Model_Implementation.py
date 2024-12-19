@@ -6,7 +6,7 @@ import plotly.graph_objects as go
 from sklearn.base import BaseEstimator
 from sklearn.preprocessing import StandardScaler
 
-# Set the page configuration
+# Page config
 st.set_page_config(
     page_title="ML Model Implementation",
     page_icon="💻",
@@ -17,7 +17,7 @@ st.set_page_config(
 st.title("ML Model Implementation")
 st.write("---")
 
-# Create two columns for file uploaders (model and scaler pkl files)
+# Two columns for file uploaders (model and scaler pkl files)
 col1, col2 = st.columns(2)
 
 # Model uploader in first column
