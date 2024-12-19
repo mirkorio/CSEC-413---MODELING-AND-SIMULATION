@@ -58,17 +58,21 @@ if 'generated_data' not in st.session_state:
 if 'samples_per_class' not in st.session_state:
     st.session_state.samples_per_class = None
 
-# Input for feature names
+# Input for feature names with default values
 st.subheader("Define Features")
-features = st.text_input("Enter feature names separated by commas (e.g., feature1, feature2, feature3):", 
-                         value=", ".join(st.session_state.feature_list) if st.session_state.feature_list else "")
+default_features = "average_viewership, player_count, prize_pool, game_duration, downloads"
+features = st.text_input("Enter feature names separated by commas (e.g., average_viewership, player_count):", 
+                         value=default_features if not st.session_state.feature_list else ", ".join(st.session_state.feature_list))
+
 if features:
     st.session_state.feature_list = [f.strip() for f in features.split(",")]
 
-# Input for class settings
+# Input for class names with default values
 st.subheader("Define Classes")
-class_names = st.text_input("Enter class names separated by commas (e.g., ClassA, ClassB, ClassC):", 
-                            value=", ".join(st.session_state.class_settings.keys()) if st.session_state.class_settings else "")
+default_classes = "League_of_Legends, Dota_2, Counter_Strike, Valorant, Mobile_Legends"
+class_names = st.text_input("Enter class names separated by commas (e.g., League_of_Legends, Dota_2):", 
+                            value=default_classes if not st.session_state.class_settings else ", ".join(st.session_state.class_settings.keys()))
+
 if class_names:
     class_list = [c.strip() for c in class_names.split(",")]
 
