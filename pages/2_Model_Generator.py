@@ -68,8 +68,6 @@ def interpret_confusion_matrix(cm):
     """Interpret the confusion matrix"""
     total = np.sum(cm)
     true_positives = np.diag(cm)
-    false_positives = np.sum(cm, axis=0) - true_positives
-    false_negatives = np.sum(cm, axis=1) - true_positives
     
     accuracy = np.sum(true_positives) / total
     misclassification = 1 - accuracy
